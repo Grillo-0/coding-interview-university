@@ -58,6 +58,10 @@ class MyArray {
             if(index > _size) throw std::invalid_argument("index out of bounds");
             return _arr[index];
         }
+        
+        T operator[](const int index){
+            return this->at(index);
+        }
 
         ArrayIterator<T> begin(){ return ArrayIterator<T>(&_arr[0]);}
 
