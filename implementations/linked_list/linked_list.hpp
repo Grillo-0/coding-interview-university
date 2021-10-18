@@ -21,7 +21,55 @@ private:
     struct Node* _tail;
     int _size;
 
+    struct Iterator {
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = struct Node;
+        using pointer = struct Node*;
+        using reference = struct Node&;
+
+        Iterator(pointer ptr)
+            : _ptr(ptr) {};
+
+        reference operator*() const { return *_ptr; }
+        pointer operator->() const { return _ptr; }
+
+        Iterator& operator++()
+        {
+            _ptr = _ptr->_next;
+            return *this;
+        }
+        Iterator operator++(int)
+        {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        friend bool operator==(const Iterator& a, const Iterator& b)
+        {
+            return a._ptr == b._ptr;
+        }
+        friend bool operator!=(const Iterator& a, const Iterator& b)
+        {
+            return a._ptr != b._ptr;
+        }
+
+    private:
+        pointer _ptr;
+    };
+
 public:
+    Iterator begin() { return Iterator(_head); }
+
+    Iterator end()
+    {
+        if (_size == 0) {
+            return Iterator(_tail);
+        }
+        return Iterator(_tail->_next);
+    }
+
     LinkedList();
 
     int size();
