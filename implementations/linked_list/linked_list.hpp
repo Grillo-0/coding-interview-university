@@ -72,6 +72,8 @@ public:
 
     LinkedList();
 
+    ~LinkedList();
+
     int size();
 
     bool empty();
@@ -108,6 +110,13 @@ LinkedList<T>::LinkedList()
     : _head(nullptr)
     , _tail(nullptr)
     , _size(0) {};
+
+template <typename T>
+LinkedList<T>::~LinkedList()
+{
+    while (_head != nullptr)
+        pop_front();
+};
 
 template <typename T>
 int LinkedList<T>::size()
