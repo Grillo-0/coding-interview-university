@@ -4,22 +4,22 @@
 
 template <typename T>
 class LinkedList {
-private:
+protected:
     struct Node {
-        T _value;
-        struct Node* _next;
+        T m_value;
+        struct Node* m_next;
 
         Node(T value)
-            : _value(value)
-            , _next(nullptr) {};
+            : m_value(value)
+            , m_next(nullptr) {};
         Node(T value, struct Node* next)
-            : _value(value)
-            , _next(next) {};
+            : m_value(value)
+            , m_next(next) {};
     };
 
-    struct Node* _head;
-    struct Node* _tail;
-    int _size;
+    struct Node* m_head;
+    struct Node* m_tail;
+    int m_size;
 
     struct Iterator {
         using iterator_category = std::forward_iterator_tag;
@@ -29,14 +29,14 @@ private:
         using reference = struct Node&;
 
         Iterator(pointer ptr)
-            : _ptr(ptr) {};
+            : m_ptr(ptr) {};
 
-        reference operator*() const { return *_ptr; }
-        pointer operator->() const { return _ptr; }
+        reference operator*() const { return *m_ptr; }
+        pointer operator->() const { return m_ptr; }
 
         Iterator& operator++()
         {
-            _ptr = _ptr->_next;
+            m_ptr = m_ptr->m_next;
             return *this;
         }
         Iterator operator++(int)
@@ -48,26 +48,26 @@ private:
 
         friend bool operator==(const Iterator& a, const Iterator& b)
         {
-            return a._ptr == b._ptr;
+            return a.m_ptr == b.m_ptr;
         }
         friend bool operator!=(const Iterator& a, const Iterator& b)
         {
-            return a._ptr != b._ptr;
+            return a.m_ptr != b.m_ptr;
         }
 
     private:
-        pointer _ptr;
+        pointer m_ptr;
     };
 
 public:
-    Iterator begin() { return Iterator(_head); }
+    Iterator begin() { return Iterator(m_head); }
 
     Iterator end()
     {
-        if (_size == 0) {
-            return Iterator(_tail);
+        if (m_size == 0) {
+            return Iterator(m_tail);
         }
-        return Iterator(_tail->_next);
+        return Iterator(m_tail->m_next);
     }
 
     LinkedList();
@@ -107,27 +107,27 @@ public:
 
 template <typename T>
 LinkedList<T>::LinkedList()
-    : _head(nullptr)
-    , _tail(nullptr)
-    , _size(0) {};
+    : m_head(nullptr)
+    , m_tail(nullptr)
+    , m_size(0) {};
 
 template <typename T>
 LinkedList<T>::~LinkedList()
 {
-    while (_head != nullptr)
+    while (m_head != nullptr)
         pop_front();
 };
 
 template <typename T>
 int LinkedList<T>::size()
 {
-    return _size;
+    return m_size;
 }
 
 template <typename T>
 bool LinkedList<T>::empty()
 {
-    return _size == 0;
+    return m_size == 0;
 }
 
 template <typename T>
@@ -135,15 +135,15 @@ T LinkedList<T>::value_at(int index)
 {
     if (index < 0)
         throw std::invalid_argument("index cannot be negative");
-    if (index == _size - 1)
-        return _tail->_value;
-    struct Node* tmp = _head;
+    if (index == m_size - 1)
+        return m_tail->m_value;
+    struct Node* tmp = m_head;
     for (int i = 0; i < index; i++) {
-        tmp = tmp->_next;
+        tmp = tmp->m_next;
         if (tmp == nullptr)
             throw std::runtime_error("index out of range");
     }
-    return tmp->_value;
+    return tmp->m_value;
 }
 
 template <typename T>
@@ -155,48 +155,48 @@ T LinkedList<T>::operator[](int index)
 template <typename T>
 void LinkedList<T>::push_front(T value)
 {
-    _head = new Node(value, _head);
-    _size++;
-    if (_size == 1) {
-        _tail = _head;
+    m_head = new Node(value, m_head);
+    m_size++;
+    if (m_size == 1) {
+        m_tail = m_head;
     }
 }
 
 template <typename T>
 void LinkedList<T>::pop_front()
 {
-    struct Node* tmp = _head;
-    _head = _head->_next;
+    struct Node* tmp = m_head;
+    m_head = m_head->m_next;
     delete tmp;
-    _size--;
+    m_size--;
 }
 
 template <typename T>
 void LinkedList<T>::push_back(T value)
 {
-    if (_size < 1) {
+    if (m_size < 1) {
         push_front(value);
         return;
     }
-    _tail->_next = new Node(value);
-    _tail = _tail->_next;
-    _size++;
+    m_tail->m_next = new Node(value);
+    m_tail = m_tail->m_next;
+    m_size++;
 }
 
 template <typename T>
 void LinkedList<T>::pop_back()
 {
-    if (_size == 1) {
+    if (m_size == 1) {
         pop_front();
         return;
     }
-    struct Node* tmp = _head;
-    while (tmp->_next != _tail)
-        tmp = tmp->_next;
-    delete tmp->_next;
-    tmp->_next = nullptr;
-    _tail = tmp;
-    _size--;
+    struct Node* tmp = m_head;
+    while (tmp->m_next != m_tail)
+        tmp = tmp->m_next;
+    delete tmp->m_next;
+    tmp->m_next = nullptr;
+    m_tail = tmp;
+    m_size--;
 }
 
 template <typename T>
@@ -208,92 +208,92 @@ T LinkedList<T>::front()
 template <typename T>
 T LinkedList<T>::back()
 {
-    return this->value_at(_size - 1);
+    return this->value_at(m_size - 1);
 }
 
 template <typename T>
 void LinkedList<T>::insert(int index, T value)
 {
-    if (index >= _size || index < 0)
+    if (index >= m_size || index < 0)
         throw std::invalid_argument("index out of range");
     if (index == 0) {
         push_front(value);
         return;
     }
-    struct Node* tmp = _head;
+    struct Node* tmp = m_head;
     struct Node* prev;
     for (int i = 0; i < index; i++) {
         prev = tmp;
-        tmp = tmp->_next;
+        tmp = tmp->m_next;
     }
     tmp = new Node(value, tmp);
-    prev->_next = tmp;
-    _size++;
+    prev->m_next = tmp;
+    m_size++;
 }
 
 template <typename T>
 void LinkedList<T>::erase(int index)
 {
-    if (index >= _size || index < 0)
+    if (index >= m_size || index < 0)
         throw std::invalid_argument("index out of range");
     if (index == 0) {
         pop_front();
         return;
     }
 
-    struct Node* tmp = _head;
-    struct Node* prev = _head;
+    struct Node* tmp = m_head;
+    struct Node* prev = m_head;
     for (int i = 0; i < index; i++) {
         prev = tmp;
-        tmp = tmp->_next;
+        tmp = tmp->m_next;
     }
-    prev->_next = tmp->_next;
+    prev->m_next = tmp->m_next;
     delete tmp;
-    _size--;
+    m_size--;
 }
 
 template <typename T>
 T LinkedList<T>::value_n_from_end(int n)
 {
-    return value_at(_size - n - 1);
+    return value_at(m_size - n - 1);
 }
 
 template <typename T>
 void LinkedList<T>::reverse()
 {
-    struct Node* curr = _head;
+    struct Node* curr = m_head;
     struct Node* prev = nullptr;
     struct Node* next = nullptr;
     while (curr != nullptr) {
-        next = curr->_next;
-        curr->_next = prev;
+        next = curr->m_next;
+        curr->m_next = prev;
         prev = curr;
         curr = next;
     }
-    _tail = _head;
-    _head = prev;
+    m_tail = m_head;
+    m_head = prev;
 }
 
 template <typename T>
 int LinkedList<T>::remove_value(int value)
 {
-    if (_head->_value == value) {
+    if (m_head->m_value == value) {
         pop_front();
         return 0;
     }
 
-    struct Node* tmp = _head;
+    struct Node* tmp = m_head;
     struct Node* prev = nullptr;
-    while (tmp != nullptr && tmp->_value != value) {
+    while (tmp != nullptr && tmp->m_value != value) {
         prev = tmp;
-        tmp = tmp->_next;
+        tmp = tmp->m_next;
     }
     if (tmp == nullptr)
         return -1;
-    prev->_next = tmp->_next;
+    prev->m_next = tmp->m_next;
     delete tmp;
-    if (prev->_next == nullptr)
-        _tail = prev;
-    _size--;
+    if (prev->m_next == nullptr)
+        m_tail = prev;
+    m_size--;
     return 0;
 }
