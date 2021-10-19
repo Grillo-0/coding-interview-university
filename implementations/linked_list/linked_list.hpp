@@ -8,13 +8,25 @@ protected:
     struct Node {
         T m_value;
         struct Node* m_next;
+        struct Node* m_prev;
 
         Node(T value)
             : m_value(value)
-            , m_next(nullptr) {};
-        Node(T value, struct Node* next)
+            , m_next(nullptr)
+            , m_prev(nullptr) {};
+
+        Node(T value, struct Node* prev, struct Node* next)
             : m_value(value)
-            , m_next(next) {};
+            , m_next(next)
+            , m_prev(prev)
+        {
+            if (m_next != nullptr) {
+                m_next->m_prev = this;
+            }
+            if (m_prev != nullptr) {
+                m_prev->m_next = this;
+            }
+        }
     };
 
     struct Node* m_head;
@@ -114,8 +126,12 @@ LinkedList<T>::LinkedList()
 template <typename T>
 LinkedList<T>::~LinkedList()
 {
-    while (m_head != nullptr)
-        pop_front();
+    struct Node* curr = m_head;
+    while (curr != m_tail) {
+        curr = curr->m_next;
+        delete curr->m_prev;
+    }
+    delete curr;
 };
 
 template <typename T>
@@ -138,6 +154,7 @@ T LinkedList<T>::value_at(int index)
     if (index == m_size - 1)
         return m_tail->m_value;
     struct Node* tmp = m_head;
+
     for (int i = 0; i < index; i++) {
         tmp = tmp->m_next;
         if (tmp == nullptr)
@@ -155,7 +172,7 @@ T LinkedList<T>::operator[](int index)
 template <typename T>
 void LinkedList<T>::push_front(T value)
 {
-    m_head = new Node(value, m_head);
+    m_head = new Node(value, nullptr, m_head);
     m_size++;
     if (m_size == 1) {
         m_tail = m_head;
@@ -165,9 +182,8 @@ void LinkedList<T>::push_front(T value)
 template <typename T>
 void LinkedList<T>::pop_front()
 {
-    struct Node* tmp = m_head;
     m_head = m_head->m_next;
-    delete tmp;
+    delete m_head->m_prev;
     m_size--;
 }
 
@@ -178,8 +194,7 @@ void LinkedList<T>::push_back(T value)
         push_front(value);
         return;
     }
-    m_tail->m_next = new Node(value);
-    m_tail = m_tail->m_next;
+    m_tail = new Node(value, m_tail, nullptr);
     m_size++;
 }
 
@@ -190,25 +205,23 @@ void LinkedList<T>::pop_back()
         pop_front();
         return;
     }
-    struct Node* tmp = m_head;
-    while (tmp->m_next != m_tail)
-        tmp = tmp->m_next;
-    delete tmp->m_next;
-    tmp->m_next = nullptr;
-    m_tail = tmp;
+
+    m_tail = m_tail->m_prev;
+    delete m_tail->m_next;
+    m_tail->m_next = nullptr;
     m_size--;
 }
 
 template <typename T>
 T LinkedList<T>::front()
 {
-    return this->value_at(0);
+    return m_head->m_value;
 }
 
 template <typename T>
 T LinkedList<T>::back()
 {
-    return this->value_at(m_size - 1);
+    return m_tail->m_value;
 }
 
 template <typename T>
@@ -220,14 +233,12 @@ void LinkedList<T>::insert(int index, T value)
         push_front(value);
         return;
     }
+
     struct Node* tmp = m_head;
-    struct Node* prev;
     for (int i = 0; i < index; i++) {
-        prev = tmp;
         tmp = tmp->m_next;
     }
-    tmp = new Node(value, tmp);
-    prev->m_next = tmp;
+    tmp = new Node(value, tmp->prev, tmp);
     m_size++;
 }
 
@@ -242,12 +253,11 @@ void LinkedList<T>::erase(int index)
     }
 
     struct Node* tmp = m_head;
-    struct Node* prev = m_head;
     for (int i = 0; i < index; i++) {
-        prev = tmp;
         tmp = tmp->m_next;
     }
-    prev->m_next = tmp->m_next;
+    tmp->prev->m_next = tmp->m_next;
+    tmp->next->m_prev = tmp->m_prev;
     delete tmp;
     m_size--;
 }
@@ -262,16 +272,14 @@ template <typename T>
 void LinkedList<T>::reverse()
 {
     struct Node* curr = m_head;
-    struct Node* prev = nullptr;
     struct Node* next = nullptr;
     while (curr != nullptr) {
         next = curr->m_next;
-        curr->m_next = prev;
-        prev = curr;
+        curr->m_next = curr->m_prev;
+        curr->m_prev = next;
         curr = next;
     }
-    m_tail = m_head;
-    m_head = prev;
+    std::swap(m_tail, m_head);
 }
 
 template <typename T>
@@ -283,17 +291,23 @@ int LinkedList<T>::remove_value(int value)
     }
 
     struct Node* tmp = m_head;
-    struct Node* prev = nullptr;
     while (tmp != nullptr && tmp->m_value != value) {
-        prev = tmp;
         tmp = tmp->m_next;
     }
+
     if (tmp == nullptr)
         return -1;
-    prev->m_next = tmp->m_next;
+
+    if (tmp == m_tail)
+        m_tail = tmp->m_prev;
+
+    if (tmp->m_prev != nullptr)
+        tmp->m_prev->m_next = tmp->m_next;
+
+    if (tmp->m_next != nullptr)
+        tmp->m_next->m_prev = tmp->m_prev;
     delete tmp;
-    if (prev->m_next == nullptr)
-        m_tail = prev;
+
     m_size--;
     return 0;
 }
