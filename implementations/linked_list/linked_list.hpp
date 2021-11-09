@@ -110,6 +110,8 @@ public:
 
     void erase(int index);
 
+    void erase(Node it);
+
     T value_n_from_end(int n);
 
     void reverse();
@@ -259,6 +261,19 @@ void LinkedList<T>::erase(int index)
     tmp->prev->m_next = tmp->m_next;
     tmp->next->m_prev = tmp->m_prev;
     delete tmp;
+    m_size--;
+}
+
+template <typename T>
+void LinkedList<T>::erase(LinkedList<T>::Node it)
+{
+    if (it.m_next != nullptr) {
+        it.m_next->m_prev = it.m_prev;
+    }
+    if (it.m_prev != nullptr) {
+        it.m_prev->m_next = it.m_next;
+    }
+    //delete it;
     m_size--;
 }
 
