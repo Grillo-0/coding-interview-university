@@ -128,6 +128,7 @@ LinkedList<T>::LinkedList()
 template <typename T>
 LinkedList<T>::~LinkedList()
 {
+	if(m_size == 0) return;
     struct Node* curr = m_head;
     while (curr != m_tail) {
         curr = curr->m_next;
@@ -184,8 +185,13 @@ void LinkedList<T>::push_front(T value)
 template <typename T>
 void LinkedList<T>::pop_front()
 {
-    m_head = m_head->m_next;
-    delete m_head->m_prev;
+	if(m_size == 1){
+		delete m_head;
+	}
+	else{
+		m_head = m_head->m_next;
+		delete m_head->m_prev;
+	}
     m_size--;
 }
 
